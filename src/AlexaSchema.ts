@@ -78,7 +78,7 @@ export class AlexaSchema extends Schema {
         this.NAMESPACE,
         `${_.kebabCase(environment)}-manifest.json`
       ),
-      content: { manifest }
+      content: JSON.stringify({ manifest }, null, 2)
     });
   }
 
@@ -110,7 +110,7 @@ export class AlexaSchema extends Schema {
         locale,
         `${_.kebabCase(environment)}-interaction.json`
       ),
-      content: this.contentLanguageModel(locale, environment)
+      content: JSON.stringify(this.contentLanguageModel(locale, environment), null, 2)
     });
 
     const canFulfillIntents = _.chain(this.intentsByPlatformAndEnvironments(locale, environment))
@@ -124,7 +124,7 @@ export class AlexaSchema extends Schema {
         this.interactionOptions.contentPath,
         `${_.kebabCase(environment)}-canfulfill-intents.json`
       ),
-      content: canFulfillIntents
+      content: JSON.stringify(canFulfillIntents, null, 2)
     });
   }
 

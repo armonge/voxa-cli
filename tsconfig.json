@@ -1,19 +1,19 @@
 {
   "compilerOptions": {
-    "outDir": "lib",
-    "declaration": true,
-    "sourceMap": true,
-    "strictNullChecks": true,
-    "module": "commonjs",
-    "target": "ES6",
-    "noImplicitAny": true,
-    "allowJs": false,
-    "moduleResolution": "node",
+    "preserveConstEnums": true,
     "resolveJsonModule": true,
-    "strict": true,
-    "lib": ["es2016"],
-    "esModuleInterop": true
+    "strictNullChecks": true,
+    "allowJs": true,
+    "module": "CommonJS",
+    "target": "ES2018",
+    "outDir": "lib",
+    "moduleResolution": "node",
+    "lib": ["es2015"],
+    "types": ["node", "mocha"],
+    "esModuleInterop": true,
+    "inlineSources": true,
+    "inlineSourceMap": true
   },
-  "include": ["./src/**/*.ts", "./src/**/*.json", "./test/**/*.ts"],
-  "exclude": ["./test/out/**/*.ts"]
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["test/out/**/*"]
 }

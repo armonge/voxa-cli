@@ -4,8 +4,8 @@ set -o xtrace
 
 rm -rf test/out
 
-yarn install --frozen-lockfile
-yarn lint
+npm install
+npm run lint
 
-yarn test-ci
-yarn report
+npm run test-ci
+npm run report

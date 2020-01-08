@@ -25,11 +25,10 @@ import { google, sheets_v4 } from "googleapis";
 import _ from "lodash";
 import { IVoxaSheet } from "../VoxaSheet";
 import { findSheetType, rowFormatted } from "./utils";
-global.Promise = bluebird;
 
 const sheets = google.sheets("v4");
-const readSpreadsheet: any = Promise.promisify(sheets.spreadsheets.get, { context: sheets });
-const readSheetTab: any = Promise.promisify(sheets.spreadsheets.values.get, { context: sheets });
+const readSpreadsheet: any = bluebird.promisify(sheets.spreadsheets.get, { context: sheets });
+const readSheetTab: any = bluebird.promisify(sheets.spreadsheets.values.get, { context: sheets });
 
 function initVoxaSheet(
   spreadsheetsId: string[],

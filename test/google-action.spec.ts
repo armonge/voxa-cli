@@ -20,34 +20,30 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import commander from "commander";
-import "source-map-support/register";
-import pkg from "../package.json";
+import _ from "lodash";
+import { expect } from "chai";
+import fs from "fs-extra";
+import path from "path";
+import { configurations } from "./mocha.spec";
 
-module.exports = async (argv: any) => {
-  commander.version(pkg.version, "-v, --version");
-  ["interaction", "init", "create"].forEach(c => {
-    commander.usage(c);
+configurations.forEach(interactionFile => {
+  if (interactionFile.name !== "Excel") {
+    return;
+  }
+  describe(`${interactionFile.name} GoogleAction Translations`, () => {
+    let xliff: string;
 
-    const command = require(`./commands/${c}`);
-    const { name, alias, options, description, action } = command;
-    const result = commander
-      .command(name || c)
-      .alias(alias)
-      .description(description);
-    (options || []).forEach((option: any) => {
-      const { flags } = option;
-      const descriptionOption = option.description;
-      result.option(flags, descriptionOption);
+    before(async () => {
+      const xliffPath = path.join(
+        path.dirname(interactionFile.interactionFileName),
+        interactionFile.speechPath,
+        "actionsOnGoogle/production/en-US.xliff"
+      );
+      xliff = (await fs.readFile(xliffPath)).toString("utf-8");
     });
-    result.action(async cmd => {
-      await action(cmd);
+
+    it("should generate the translations for the googleaction", () => {
+      expect(xliff).to.include("sampleInvocations.1");
     });
   });
-
-  commander.parse(argv);
-
-  if (argv.length === 2) {
-    commander.help();
-  }
-};
+});

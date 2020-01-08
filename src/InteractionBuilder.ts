@@ -20,6 +20,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 /* tslint:disable:no-console no-submodule-imports */
+import bluebird from "bluebird";
 import fsExtra from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -29,9 +30,11 @@ import { DialogflowSchema } from "./DialogflowSchema";
 import { downloadDirs } from "./Drive";
 import { IFileContent, IInvocation, Schema } from "./Schema";
 import { IPlatformSheets, IVoxaSheet } from "./VoxaSheet";
-const fs = Promise.promisifyAll(fsExtra);
+import { ActionsOnGoogleSchema } from "./ActionsOnGoogleSchema";
 
-export type ISupportedPlatforms = "alexa" | "dialogflow";
+const fs = bluebird.promisifyAll(fsExtra);
+
+export type ISupportedPlatforms = "alexa" | "dialogflow" | "actionsOnGoogle";
 
 export interface IInteractionOptions {
   rootPath?: string;
@@ -108,17 +111,14 @@ function defaultOptions(interactionOptions: IInteractionOptions): IDefinedIntera
 
   platforms = _.chain(spreadsheetMapping)
     .toPairs()
-    .reduce(
-      (acc: string[], next: any[]) => {
-        const key = next[0];
-        const value = next[1];
-        if (value) {
-          acc.push(key);
-        }
-        return acc;
-      },
-      [] as ISupportedPlatforms[]
-    )
+    .reduce((acc: string[], next: any[]) => {
+      const key = next[0];
+      const value = next[1];
+      if (value) {
+        acc.push(key);
+      }
+      return acc;
+    }, [] as ISupportedPlatforms[])
     .concat(platforms)
     .filter()
     .uniq()
@@ -186,7 +186,7 @@ export const buildInteraction = async (interactionOptions: IInteractionOptions, 
 
   console.timeEnd("timeframe");
   const platforms = definedInteractionOptions.platforms;
-  const schemas = [];
+  const schemas: Schema[] = [];
 
   if (platforms.includes("alexa")) {
     const schema = new AlexaSchema(alexaSpreadsheets, definedInteractionOptions);
@@ -195,6 +195,11 @@ export const buildInteraction = async (interactionOptions: IInteractionOptions, 
 
   if (platforms.includes("dialogflow")) {
     const schema = new DialogflowSchema(dialogflowSpreadsheets, definedInteractionOptions);
+    schemas.push(schema);
+  }
+
+  if (platforms.includes("actionsOnGoogle")) {
+    const schema = new ActionsOnGoogleSchema(dialogflowSpreadsheets, definedInteractionOptions);
     schemas.push(schema);
   }
 
@@ -210,28 +215,29 @@ export const buildInteraction = async (interactionOptions: IInteractionOptions, 
     )
   );
 
-  const fileContentsProcess = schemas
-    .reduce(
-      (acc, schema, index) => {
-        if (index === 0) {
-          // We only want to execute this file once
-          schema.buildDownloads();
-          schema.buildViews();
-          schema.buildViewsMapping();
-          schema.buildSynonyms();
-        }
+  const fileContentsProcess = await bluebird.reduce(
+    schemas,
+    async (acc, schema: Schema, index) => {
+      if (index === 0) {
+        // We only want to execute this file once
+        schema.buildDownloads();
+        schema.buildViews();
+        schema.buildViewsMapping();
+        schema.buildSynonyms();
+      }
 
-        schema.invocations.map((invoc: IInvocation) => {
-          schema.build(invoc.locale, invoc.environment);
-        });
-        acc = acc.concat(schema.fileContent);
-        return acc;
-      },
-      [] as IFileContent[]
-    )
-    .map((file: IFileContent) =>
-      fs.outputFile(file.path, JSON.stringify(file.content, null, 2), { flag: "w" })
-    );
+      await bluebird.map(schema.invocations, (invoc: IInvocation) => {
+        return schema.build(invoc.locale, invoc.environment);
+      });
+      acc = acc.concat(schema.fileContent);
+      return acc;
+    },
+    [] as IFileContent[]
+  );
+
+  fileContentsProcess.map((file: IFileContent) =>
+    fs.outputFile(file.path, file.content, { flag: "w" })
+  );
 
   await Promise.all(fileContentsProcess);
   await downloadDirs(

@@ -154,7 +154,7 @@ export default class VoxaGenerator {
   }
 
   private async copyGitIgnoreFile() {
-    return this.generateHandlebarTemplateFile(".gitignore")
+    return this.generateHandlebarTemplateFile(".gitignore");
   }
 
   private copyInteractionFile() {

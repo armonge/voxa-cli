@@ -94,7 +94,7 @@ export abstract class Schema {
           `${download.locale}/${_.kebabCase(download.name)}.json`
         ),
 
-        content: download.data
+        content: JSON.stringify(download.data, null, 2)
       };
       this.fileContent.push(file);
     });
@@ -141,15 +141,12 @@ export abstract class Schema {
     const viewsContent = _.chain(this.views)
       .map(view => pathsFinder(view.data).map(viewPath => ({ locale: view.locale, viewPath })))
       .flatten()
-      .reduce(
-        (acc, next) => {
-          const locales = _.get(acc, next.viewPath, []);
-          locales.push(next.locale);
-          acc[next.viewPath] = _.uniq(locales);
-          return acc;
-        },
-        {} as any
-      )
+      .reduce((acc, next) => {
+        const locales = _.get(acc, next.viewPath, []);
+        locales.push(next.locale);
+        acc[next.viewPath] = _.uniq(locales);
+        return acc;
+      }, {} as any)
       .value();
 
     const variablesContent = _.chain(this.views)
@@ -160,30 +157,27 @@ export abstract class Schema {
         }))
       )
       .flatten()
-      .reduce(
-        (acc, next) => {
-          if (_.isArray(next.variables)) {
-            next.variables.map(variable => {
-              const locales = _.get(acc, variable, []);
-              locales.push(next.locale);
-              acc[variable] = _.uniq(locales);
-            });
-          }
+      .reduce((acc, next) => {
+        if (_.isArray(next.variables)) {
+          next.variables.map(variable => {
+            const locales = _.get(acc, variable, []);
+            locales.push(next.locale);
+            acc[variable] = _.uniq(locales);
+          });
+        }
 
-          return acc;
-        },
-        {} as any
-      )
+        return acc;
+      }, {} as any)
       .value();
 
     const fileViewMap: IFileContent = {
       path: this.buildFilePath(this.interactionOptions.viewsPath, "views.map.json"),
-      content: viewsContent
+      content: JSON.stringify(viewsContent, null, 2)
     };
 
     const fileVariablesMap: IFileContent = {
       path: this.buildFilePath(this.interactionOptions.viewsPath, "variables.map.json"),
-      content: variablesContent
+      content: JSON.stringify(variablesContent, null, 2)
     };
 
     this.fileContent.push(fileViewMap, fileVariablesMap);
@@ -197,7 +191,7 @@ export abstract class Schema {
 
     const file: IFileContent = {
       path: this.buildFilePath(this.interactionOptions.viewsPath, "views.json"),
-      content: viewsContent
+      content: JSON.stringify(viewsContent, null, 2)
     };
     this.fileContent.push(file);
   }
@@ -210,8 +204,8 @@ export abstract class Schema {
           "synonyms",
           `${slot.locale}/${_.kebabCase(slot.name)}.json`
         ),
-        content: slot.values.reduce(
-          (acc: any, next: any) => {
+        content: JSON.stringify(
+          slot.values.reduce((acc: any, next: any) => {
             if (_.isEmpty(next.synonyms)) {
               acc[next.value] = next.value;
             } else {
@@ -220,8 +214,9 @@ export abstract class Schema {
               });
             }
             return acc;
-          },
-          {} as any
+          }, {} as any),
+          null,
+          2
         )
       };
       this.fileContent.push(file);

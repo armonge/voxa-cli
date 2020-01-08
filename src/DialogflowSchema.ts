@@ -21,7 +21,6 @@
  */
 /* tslint:disable:no-empty no-submodule-imports */
 import _ from "lodash";
-import path from "path";
 import uuid from "uuid/v5";
 import { AGENT, BUILT_IN_INTENTS } from "./DialogflowDefault";
 import { IFileContent, IIntent, Schema } from "./Schema";
@@ -68,7 +67,7 @@ const LANG_BUT_LOCALE = _(LOCALES)
   .uniq()
   .value();
 
-const AVAILABLE_LOCALES = LANG_BUT_LOCALE.concat(LOCALES);
+export const AVAILABLE_LOCALES = LANG_BUT_LOCALE.concat(LOCALES);
 
 export interface IDialogflowMessage {
   type: number;
@@ -97,9 +96,13 @@ export class DialogflowSchema extends Schema {
   public buildPackage(environment: string) {
     const file: IFileContent = {
       path: this.buildFilePath(environment, "package.json"),
-      content: {
-        version: "1.0.0"
-      }
+      content: JSON.stringify(
+        {
+          version: "1.0.0"
+        },
+        null,
+        2
+      )
     };
     this.fileContent.push(file);
   }
@@ -169,7 +172,7 @@ export class DialogflowSchema extends Schema {
 
     const file: IFileContent = {
       path: this.buildFilePath(environment, "agent.json"),
-      content: agent
+      content: JSON.stringify(agent, null, 2)
     };
     this.fileContent.push(file);
   }
@@ -251,7 +254,7 @@ export class DialogflowSchema extends Schema {
       if (!_.isEmpty(resultSamples)) {
         const file: IFileContent = {
           path: this.buildFilePath(environment, "intents", `${name}_usersays_${locale}.json`),
-          content: resultSamples
+          content: JSON.stringify(resultSamples, null, 2)
         };
         this.fileContent.push(file);
       }
@@ -285,7 +288,7 @@ export class DialogflowSchema extends Schema {
         }))
         .value();
 
-      const messages = [];
+      const messages: IDialogflowMessage[] = [];
       if (responses.length > 0) {
         messages.push({
           type: 0,
@@ -319,7 +322,7 @@ export class DialogflowSchema extends Schema {
       _.set(intent, "id", hashObj(intent));
       const file: IFileContent = {
         path: this.buildFilePath(environment, "intents", `${intent.name}.json`),
-        content: intent
+        content: JSON.stringify(intent, null, 2)
       };
       this.fileContent.push(file);
       return intent;
@@ -344,7 +347,7 @@ export class DialogflowSchema extends Schema {
 
         const fileDef: IFileContent = {
           path: this.buildFilePath(environment, "entities", `${slotName}.json`),
-          content: slotContent
+          content: JSON.stringify(slotContent, null, 2)
         };
 
         const fileValue: IFileContent = {
@@ -353,7 +356,7 @@ export class DialogflowSchema extends Schema {
             "entities",
             `${slotName}_entries_${localeEntity}.json`
           ),
-          content: values
+          content: JSON.stringify(values, null, 2)
         };
 
         this.fileContent.push(fileDef, fileValue);

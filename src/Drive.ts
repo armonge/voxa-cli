@@ -23,6 +23,7 @@ import crypto = require("crypto");
 import fs = require("fs-extra");
 import { drive_v3, google } from "googleapis";
 import path from "path";
+import bluebird from "bluebird";
 
 export async function downloadDirs(dirs: string[], assetsRoot: string, key: any) {
   const jwtClient = new google.auth.JWT(
@@ -42,7 +43,7 @@ export async function downloadDirs(dirs: string[], assetsRoot: string, key: any)
     const reply = await resInFolder(drive, dir);
     const files = reply.data.files;
     if (files) {
-      await Promise.map(files, file => downloadResource(drive, file, assetsRoot));
+      await bluebird.map(files, file => downloadResource(drive, file, assetsRoot));
     }
   }
 }
@@ -94,7 +95,7 @@ export async function downloadDirectoryResource(
   const reply = await resInFolder(driveService, fileResource.id as string);
   const files = reply.data.files;
   if (files) {
-    await Promise.map(files, file => downloadResource(driveService, file, newRoot));
+    await bluebird.map(files, file => downloadResource(driveService, file, newRoot));
   }
 }
 

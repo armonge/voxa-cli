@@ -71,18 +71,15 @@ export function invocationProcessor(voxaSheets: IVoxaSheet[], AVAILABLE_LOCALES:
     _.includes([SheetTypes.INVOCATION], getSheetType(voxaSheet))
   );
 
-  return voxaSheetsInvocations.reduce(
-    (acc, voxaSheet: IVoxaSheet) => {
-      const locale = sheetLocale(voxaSheet, AVAILABLE_LOCALES);
-      voxaSheet.data.map((item: any) => {
-        const { environment, invocationName } = item;
-        acc.push({ name: invocationName, environment, locale });
-      });
+  return voxaSheetsInvocations.reduce((acc, voxaSheet: IVoxaSheet) => {
+    const locale = sheetLocale(voxaSheet, AVAILABLE_LOCALES);
+    voxaSheet.data.map((item: any) => {
+      const { environment, invocationName } = item;
+      acc.push({ name: invocationName, environment, locale });
+    });
 
-      return acc;
-    },
-    [] as IInvocation[]
-  );
+    return acc;
+  }, [] as IInvocation[]);
 }
 
 export function viewsProcessor(voxaSheets: IVoxaSheet[], AVAILABLE_LOCALES: string[]) {
@@ -112,9 +109,10 @@ export function viewsProcessor(voxaSheets: IVoxaSheet[], AVAILABLE_LOCALES: stri
         const shouldBeArray = [".text", ".say", ".reprompt", ".tell", ".ask"].find(suffix =>
           path.includes(suffix)
         );
-        const isASuggestionChip = [".dialogflowsuggestions", ".facebooksuggestionchips"].find(
-          option => pathLowerCase.includes(option)
-        );
+        const isASuggestionChip = [
+          ".dialogflowsuggestions",
+          ".facebooksuggestionchips"
+        ].find(option => pathLowerCase.includes(option));
 
         if (shouldBeArray && _.isString(value) && !_.isEmpty(value)) {
           const temp = _.get(acc, path, []) as string[];
@@ -146,20 +144,17 @@ export function slotProcessor(voxaSheets: IVoxaSheet[], AVAILABLE_LOCALES: strin
     const values = _.chain(voxaSheet.data)
       .groupBy("synonym")
       .toPairs()
-      .reduce(
-        (acc, slot) => {
-          const key = slot[0];
-          const synonyms = slot[1] || [];
+      .reduce((acc, slot) => {
+        const key = slot[0];
+        const synonyms = slot[1] || [];
 
-          if (key === undefined || key === "undefined") {
-            acc.push(synonyms.map(synonymName => ({ value: synonymName[name], synonyms: [] })));
-          } else {
-            acc.push({ value: key, synonyms: _.map(synonyms, name) });
-          }
-          return acc;
-        },
-        [] as Array<{}>
-      )
+        if (key === undefined || key === "undefined") {
+          acc.push(synonyms.map(synonymName => ({ value: synonymName[name], synonyms: [] })));
+        } else {
+          acc.push({ value: key, synonyms: _.map(synonyms, name) });
+        }
+        return acc;
+      }, [] as Array<{}>)
       .flattenDeep()
       .filter("value")
       .uniq()
@@ -224,106 +219,103 @@ export function intentUtterProcessor(voxaSheets: IVoxaSheet[], AVAILABLE_LOCALES
         .uniq()
         .groupBy("Intent")
         .toPairs()
-        .reduce(
-          (acc: IIntent[], item: any) => {
-            const intentName = item[0] as string;
-            const head = _.head(item[1]);
-            const events: string[] = splitValues(head, "events");
-            const environments: string[] = splitValues(head, "environment");
-            const platforms: string[] = splitValues(head, "platformIntent", true);
-            const signInRequired = _.get(head, "signInRequired", false) as boolean;
+        .reduce((acc: IIntent[], item: any) => {
+          const intentName = item[0] as string;
+          const head = _.head(item[1]);
+          const events: string[] = splitValues(head, "events");
+          const environments: string[] = splitValues(head, "environment");
+          const platforms: string[] = splitValues(head, "platformIntent", true);
+          const signInRequired = _.get(head, "signInRequired", false) as boolean;
 
-            const webhookForSlotFilling = (_.get(head, "webhookForSlotFilling", false) ||
-              _.get(head, "useWebhookForSlotFilling", false)) as boolean;
-            const webhookUsed = _.get(head, "webhookUsed", true) as boolean;
-            const canFulfillIntent = _.get(head, "canFulfillIntent", false) as boolean;
-            const startIntent = _.get(head, "startIntent", false) as boolean;
-            const endIntent = _.get(head, "endIntent", false) as boolean;
-            const confirmationRequired = _.get(head, "confirmationRequired", false) as boolean;
-            const delegationStrategy = _.get(head, "delegationStrategy");
+          const webhookForSlotFilling = (_.get(head, "webhookForSlotFilling", false) ||
+            _.get(head, "useWebhookForSlotFilling", false)) as boolean;
+          const webhookUsed = _.get(head, "webhookUsed", true) as boolean;
+          const canFulfillIntent = _.get(head, "canFulfillIntent", false) as boolean;
+          const startIntent = _.get(head, "startIntent", false) as boolean;
+          const endIntent = _.get(head, "endIntent", false) as boolean;
+          const confirmationRequired = _.get(head, "confirmationRequired", false) as boolean;
+          const delegationStrategy = _.get(head, "delegationStrategy");
 
-            const samples = getIntentValueList(
-              voxaSheetsUtter,
-              voxaSheetIntent.spreadsheetId,
-              intentName,
-              "utterance"
-            );
+          const samples = getIntentValueList(
+            voxaSheetsUtter,
+            voxaSheetIntent.spreadsheetId,
+            intentName,
+            "utterance"
+          );
 
-            const responses = getIntentValueList(
-              voxaSheetResponses,
-              voxaSheetIntent.spreadsheetId,
-              intentName,
-              "response"
-            );
+          const responses = getIntentValueList(
+            voxaSheetResponses,
+            voxaSheetIntent.spreadsheetId,
+            intentName,
+            "response"
+          );
 
-            const confirmations = getIntentValueList(
-              voxaSheetPrompts,
-              voxaSheetIntent.spreadsheetId,
-              `${intentName}/confirmation`,
-              "prompt"
-            );
+          const confirmations = getIntentValueList(
+            voxaSheetPrompts,
+            voxaSheetIntent.spreadsheetId,
+            `${intentName}/confirmation`,
+            "prompt"
+          );
 
-            const slotsDefinition: ISlotDefinition[] = _.chain(item[1])
-              .filter("slotName")
-              .map(
-                (slot: any): ISlotDefinition => ({
-                  name: slot.slotName,
-                  type: slot.slotType,
-                  platform: slot.platformSlot,
-                  required: slot.slotRequired || false,
-                  requiresConfirmation: slot.slotConfirmationRequired || false,
-                  requiresElicitation: slot.slotElicitationRequired || false,
-                  samples: getIntentValueList(
-                    voxaSheetsUtter,
+          const slotsDefinition: ISlotDefinition[] = _.chain(item[1])
+            .filter("slotName")
+            .map(
+              (slot: any): ISlotDefinition => ({
+                name: slot.slotName,
+                type: slot.slotType,
+                platform: slot.platformSlot,
+                required: slot.slotRequired || false,
+                requiresConfirmation: slot.slotConfirmationRequired || false,
+                requiresElicitation: slot.slotElicitationRequired || false,
+                samples: getIntentValueList(
+                  voxaSheetsUtter,
+                  voxaSheetIntent.spreadsheetId,
+                  `${intentName}/${slot.slotName}`,
+                  "utterance"
+                ),
+                prompts: {
+                  confirmation: getIntentValueList(
+                    voxaSheetPrompts,
                     voxaSheetIntent.spreadsheetId,
-                    `${intentName}/${slot.slotName}`,
-                    "utterance"
+                    `${intentName}/${slot.slotName}/confirmation`,
+                    "prompt"
                   ),
-                  prompts: {
-                    confirmation: getIntentValueList(
-                      voxaSheetPrompts,
-                      voxaSheetIntent.spreadsheetId,
-                      `${intentName}/${slot.slotName}/confirmation`,
-                      "prompt"
-                    ),
-                    elicitation: getIntentValueList(
-                      voxaSheetPrompts,
-                      voxaSheetIntent.spreadsheetId,
-                      `${intentName}/${slot.slotName}/elicitation`,
-                      "prompt"
-                    )
-                  }
-                })
-              )
-              .compact()
-              .uniq()
-              .value();
+                  elicitation: getIntentValueList(
+                    voxaSheetPrompts,
+                    voxaSheetIntent.spreadsheetId,
+                    `${intentName}/${slot.slotName}/elicitation`,
+                    "prompt"
+                  )
+                }
+              })
+            )
+            .compact()
+            .uniq()
+            .value();
 
-            const intent: IIntent = {
-              name: intentName,
-              samples,
-              responses,
-              slotsDefinition,
-              webhookForSlotFilling,
-              webhookUsed,
-              canFulfillIntent,
-              startIntent,
-              endIntent,
-              events,
-              confirmations,
-              environments,
-              platforms,
-              locale,
-              signInRequired,
-              confirmationRequired,
-              delegationStrategy
-            };
+          const intent: IIntent = {
+            name: intentName,
+            samples,
+            responses,
+            slotsDefinition,
+            webhookForSlotFilling,
+            webhookUsed,
+            canFulfillIntent,
+            startIntent,
+            endIntent,
+            events,
+            confirmations,
+            environments,
+            platforms,
+            locale,
+            signInRequired,
+            confirmationRequired,
+            delegationStrategy
+          };
 
-            acc.push(intent);
-            return acc;
-          },
-          [] as IIntent[]
-        )
+          acc.push(intent);
+          return acc;
+        }, [] as IIntent[])
         .value();
 
       return voxaSheetIntent.data;
@@ -346,32 +338,29 @@ export function publishingProcessor(voxaSheets: IVoxaSheet[], AVAILABLE_LOCALES:
     )
   );
 
-  return voxaSheetsPublishing.reduce(
-    (acc, voxaSheet: IVoxaSheet) => {
-      voxaSheet.data.map((item: any) => {
-        const locale = voxaSheet.sheetTitle.split("@")[1] || AVAILABLE_LOCALES[0];
-        const environments = _.chain(item)
-          .get("environment", "")
-          .split(",")
-          .map(_.trim)
-          .compact()
-          .value() as string[];
-        const key = _.chain(item)
-          .get("key", "")
-          .replace("{locale}", locale)
-          .value();
-        const value = _.chain(item)
-          .get("value", "")
-          .value();
+  return voxaSheetsPublishing.reduce((acc, voxaSheet: IVoxaSheet) => {
+    voxaSheet.data.map((item: any) => {
+      const locale = voxaSheet.sheetTitle.split("@")[1] || AVAILABLE_LOCALES[0];
+      const environments = _.chain(item)
+        .get("environment", "")
+        .split(",")
+        .map(_.trim)
+        .compact()
+        .value() as string[];
+      const key = _.chain(item)
+        .get("key", "")
+        .replace("{locale}", locale)
+        .value();
+      const value = _.chain(item)
+        .get("value", "")
+        .value();
 
-        const publishInfo: IPublishingInformation = { key, value, environments };
-        acc.push(publishInfo);
-      });
+      const publishInfo: IPublishingInformation = { key, value, environments };
+      acc.push(publishInfo);
+    });
 
-      return acc;
-    },
-    [] as IPublishingInformation[]
-  );
+    return acc;
+  }, [] as IPublishingInformation[]);
 }
 
 function filterSheets(voxaSheets: IVoxaSheet[], sheetTypes: string[]): IVoxaSheet[] {

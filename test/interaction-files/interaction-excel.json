@@ -1,4 +1,5 @@
 {
+  "sourceLanguage": "de",
   "platforms": ["dialogflow", "alexa", "actionsOnGoogle"],
   "spreadsheets": ["../spreadsheets/Voxa Cli Intents Utterances en-US.xlsx"],
   "viewsPath": "../out/excel/",

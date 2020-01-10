@@ -37,6 +37,7 @@ const fs = bluebird.promisifyAll(fsExtra);
 export type ISupportedPlatforms = "alexa" | "dialogflow" | "actionsOnGoogle";
 
 export interface IInteractionOptions {
+  sourceLanguage?: string;
   rootPath?: string;
   speechPath?: string;
   platforms?: ISupportedPlatforms[] | ISupportedPlatforms;
@@ -51,6 +52,7 @@ export interface IInteractionOptions {
 }
 
 export interface IDefinedInteractionOptions {
+  sourceLanguage: string;
   rootPath: string;
   speechPath: string;
   platforms: ISupportedPlatforms[];
@@ -65,6 +67,7 @@ export interface IDefinedInteractionOptions {
 }
 
 export const DEFAULT_INTERACTION_OPTIONS = {
+  sourceLanguage: "en",
   speechPath: "speech-assets",
   platforms: ["alexa"] as ISupportedPlatforms[],
   contentPath: "content",
@@ -76,6 +79,8 @@ export const DEFAULT_INTERACTION_OPTIONS = {
 
 function defaultOptions(interactionOptions: IInteractionOptions): IDefinedInteractionOptions {
   const rootPath: string = interactionOptions.rootPath || "";
+  const sourceLanguage =
+    interactionOptions.sourceLanguage || DEFAULT_INTERACTION_OPTIONS.sourceLanguage;
   const speechPath: string =
     interactionOptions.speechPath || DEFAULT_INTERACTION_OPTIONS.speechPath;
   const synonymPath: string =
@@ -131,6 +136,7 @@ function defaultOptions(interactionOptions: IInteractionOptions): IDefinedIntera
   platforms = _.isEmpty(platforms) ? DEFAULT_INTERACTION_OPTIONS.platforms : platforms;
 
   return {
+    sourceLanguage,
     rootPath,
     spreadsheets,
     alexaSpreadsheets,

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd" xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="agent.proto" datatype="plaintext" source-language="de" target-language="en-US">
+    <body>
+      <trans-unit id="tu1" resname="assistantAppName">
+        <source xml:lang="de">action name</source>
+        <target xml:lang="en-US">action name</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="tu2" resname="pronunciation">
+        <source xml:lang="de">action pronunciation</source>
+        <target xml:lang="en-US">action pronunciation</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="tu3" resname="shortDescription">
+        <source xml:lang="de">SHORT ACTION DESCRIPTION</source>
+        <target xml:lang="en-US">SHORT ACTION DESCRIPTION</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="tu4" resname="fullDescription">
+        <source xml:lang="de">FULL ACTION DESCRIPTION</source>
+        <target xml:lang="en-US">FULL ACTION DESCRIPTION</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="tu5" resname="developerName">
+        <source xml:lang="de">DEVELOPER NAME</source>
+        <target xml:lang="en-US">DEVELOPER NAME</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="tu6" resname="email">
+        <source xml:lang="de">developer@example.com</source>
+        <target xml:lang="en-US">developer@example.com</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="tu7" resname="linkToTermsOfService">
+        <source xml:lang="de">https://example.com/terms</source>
+        <target xml:lang="en-US">https://example.com/terms</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="tu8" resname="assistantAppVoice">
+        <source xml:lang="de">female_1</source>
+        <target xml:lang="en-US">female_1</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="tu9" resname="assistantAppExternalVoiceName">
+        <source xml:lang="de">female_1</source>
+        <target xml:lang="en-US">female_1</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="tu10" resname="linkToPrivacyPolicy">
+        <source xml:lang="de">https://example.com/policy</source>
+        <target xml:lang="en-US">https://example.com/policy</target>
+        <note></note>
+      </trans-unit>
+      <group id="grpId1" resname="sampleInvocations">
+        <trans-unit id="tu11" resname="sampleInvocations.1">
+          <source xml:lang="de">Talk to action name</source>
+          <target xml:lang="en-US">Talk to action name</target>
+          <note></note>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+</xliff>

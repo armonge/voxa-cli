@@ -32,18 +32,26 @@ configurations.forEach(interactionFile => {
   }
   describe(`${interactionFile.name} GoogleAction Translations`, () => {
     let xliff: string;
+    let sample: string;
 
     before(async () => {
       const xliffPath = path.join(
         path.dirname(interactionFile.interactionFileName),
         interactionFile.speechPath,
-        "actionsOnGoogle/production/en-US.xliff"
+        "actionsOnGoogle/production/en-US.xlf"
       );
       xliff = (await fs.readFile(xliffPath)).toString("utf-8");
+
+      const samplePath = path.join(__dirname, "en-US.xlf");
+      sample = (await fs.readFile(samplePath)).toString("utf-8");
     });
 
     it("should generate the translations for the googleaction", () => {
       expect(xliff).to.include("sampleInvocations.1");
+    });
+
+    it("should be exactly as the sample", () => {
+      expect(xliff).to.equal(sample);
     });
   });
 });

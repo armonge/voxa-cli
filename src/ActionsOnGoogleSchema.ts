@@ -38,8 +38,9 @@ export class ActionsOnGoogleSchema extends Schema {
                   return [
                     `tu${index}`,
                     {
-                      source: translation,
+                      source: value,
                       target: translation,
+                      note: "",
                       additionalAttributes: {
                         resname: `${key}.${groupIndex + 1}`
                       }
@@ -57,8 +58,9 @@ export class ActionsOnGoogleSchema extends Schema {
           {
             source: value,
             target: value,
+            note: "",
             additionalAttributes: {
-              resName: key
+              resname: key
             }
           }
         ];
@@ -66,22 +68,27 @@ export class ActionsOnGoogleSchema extends Schema {
       .fromPairs()
       .value();
 
+    console.log(this.interactionOptions);
+
     const xliffObject = {
-      sourceLanguage: locale,
+      datatype: "x-undefined",
+      sourceLanguage: this.interactionOptions.sourceLanguage,
       targetLanguage: locale,
       resources: {
         "agent.proto": xliffUnits
       }
     };
 
-    const xliff = jsToXliff12(xliffObject, { xmlLangAttr: true });
+    const xliff = `<?xml version="1.0" encoding="UTF-8" ?>\n${jsToXliff12(xliffObject, {
+      xmlLangAttr: true
+    })}\n`;
     this.fileContent.push({
       path: path.join(
         this.interactionOptions.rootPath,
         this.interactionOptions.speechPath,
         this.NAMESPACE,
         _.kebabCase(environment),
-        `${locale}.xliff`
+        `${locale}.xlf`
       ),
       content: xliff
     });
